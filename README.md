@@ -2,6 +2,12 @@
 
 Udemy's Build a Backend REST API with Python &amp; Django - Advanced course
 
+# Creating a new app in Django
+
+```bash
+docker-compose run --rm app sh -c "python manage.py startapp core"
+```
+
 # Running flake8
 
 ```bash
