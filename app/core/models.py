@@ -39,7 +39,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    objects = UserManager()  # this is required for django to work with our custom user model
+    # this is required for django to work with our custom user model
+    objects = UserManager()
 
     USERNAME_FIELD = 'email'
 
@@ -47,8 +48,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Recipe(models.Model):
     """Recipe object"""
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # this is the user model that is active in the project
-        on_delete=models.CASCADE  # if the user is deleted, delete the recipe
+        # this is the user model that is active in the project
+        settings.AUTH_USER_MODEL,
+        # if the user is deleted, delete the recipe
+        on_delete=models.CASCADE
     )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)

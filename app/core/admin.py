@@ -34,7 +34,7 @@ class UserAdmin(BaseUserAdmin):
         )
     )
     # this is to make the last_login field read-only
-    readonly_fields = ['last_login',]
+    readonly_fields = ['last_login', ]
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
