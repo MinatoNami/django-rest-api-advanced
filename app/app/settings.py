@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'rest_framework',  # this is the Django REST framework
-    'drf_spectacular'  # this is the OpenAPI schema generator
+    'drf_spectacular',  # this is the OpenAPI schema generator
+    'user',
 ]
 
 MIDDLEWARE = [
