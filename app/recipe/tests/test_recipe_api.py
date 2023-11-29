@@ -88,8 +88,8 @@ class PrivateRecipeApiTests(TestCase):
 
         res = self.client.get(RECIPE_URL)
 
-        recipes = Recipe.objects.filter(user=self.user).order_by('-id')
-        # many=True because we are serializing a queryset
+        recipes = Recipe.objects.filter(user=self.user)
+
         serializer = RecipeSerializer(recipes, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
@@ -103,3 +103,20 @@ class PrivateRecipeApiTests(TestCase):
 
         serializer = RecipeDetailSerializer(recipe)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_recipe(self):
+        """Test creating a recipe"""
+        payload = {
+            'title': 'Sample recipe',
+            'time_minutes': 30,
+            'price': Decimal('5.99'),
+        }
+        res = self.client.post(RECIPE_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        # get the recipe from the database
+        recipe = Recipe.objects.get(id=res.data['id'])
+        # check that the recipe matches the payload
+        for k, v in payload.items():
+            self.assertEqual(v, getattr(recipe, k), v)
+        self.assertEqual(recipe.user, self.user)
