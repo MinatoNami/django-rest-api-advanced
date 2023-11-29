@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'rest_framework',  # this is the Django REST framework
+    'rest_framework.authtoken',  # this is the Django REST framework token authentication
     'drf_spectacular',  # this is the OpenAPI schema generator
     'user',
 ]
