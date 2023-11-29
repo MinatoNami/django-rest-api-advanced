@@ -31,3 +31,17 @@ docker-compose run --rm app sh -c "python manage.py test"
 7. Check for indentations in test cases.
 8. Check for ImportErrors in test cases.
 9. Use test directory or tests.py file for writing test cases.
+
+Git branches:
+
+1. Main branch: main
+2. Template project branch: template-project
+
+Note:
+Template project branch is the branch in which the following things are already done:
+
+1. Flake8 is installed.
+2. Basic User creation is done.
+3. Token authentication is done.
+4. Docker is properly setup.
+5. Unit tests are written for most features.
