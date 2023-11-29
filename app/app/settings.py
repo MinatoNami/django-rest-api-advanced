@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',  # this is the Django REST framework token authentication
     'drf_spectacular',  # this is the OpenAPI schema generator
     'user',
+    'recipe',
 ]
 
 MIDDLEWARE = [
