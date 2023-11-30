@@ -60,6 +60,7 @@ class Recipe(models.Model):
     link = models.CharField(max_length=255, blank=True)  # optional field
     # this is a string because the Tag model is defined below
     tags = models.ManyToManyField('Tag')
+    ingredients = models.ManyToManyField('Ingredient')
 
     def __str__(self):
         return self.title
@@ -67,6 +68,20 @@ class Recipe(models.Model):
 
 class Tag(models.Model):
     """Tag to be used for a recipe"""
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        # this is the user model that is active in the project
+        settings.AUTH_USER_MODEL,
+        # if the user is deleted, delete the recipe
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    """Ingredient to be used in a recipe"""
     name = models.CharField(max_length=255)
     user = models.ForeignKey(
         # this is the user model that is active in the project

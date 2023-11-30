@@ -10,7 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from core.models import (
     Recipe,
-    Tag
+    Tag,
+    Ingredient
 )
 from recipe import serializers
 
@@ -46,15 +47,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class TagViewSet(mixins.DestroyModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.ListModelMixin,
-                 viewsets.GenericViewSet):
-    """Manage tags in the database"""
-    serializer_class = serializers.TagSerializer
+class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
+                            mixins.UpdateModelMixin,
+                            mixins.ListModelMixin,
+                            viewsets.GenericViewSet):
+    """Base viewset for user owned recipe attributes"""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = Tag.objects.all().order_by('-name')
 
     def get_queryset(self):
         """Return objects for the current authenticated user only"""
@@ -62,7 +61,14 @@ class TagViewSet(mixins.DestroyModelMixin,
         # We can use this to filter the queryset.
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
-    def perform_create(self, serializer):
-        """Create a new tag"""
-        # The serializer will take care of adding the user to the data.
-        serializer.save(user=self.request.user)
+
+class TagViewSet(BaseRecipeAttrViewSet):
+    """Manage tags in the database"""
+    serializer_class = serializers.TagSerializer
+    queryset = Tag.objects.all().order_by('-name')
+
+
+class IngredientViewSet(BaseRecipeAttrViewSet):
+    """Manage ingredients in the database"""
+    serializer_class = serializers.IngredientSerializer
+    queryset = Ingredient.objects.all().order_by('-name')
