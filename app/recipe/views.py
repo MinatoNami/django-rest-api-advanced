@@ -1,6 +1,13 @@
 """
 Views for the recipe API
 """
+from drf_spectacular.utils import (
+    extend_schema_view,
+    extend_schema,
+    OpenApiParameter,
+    OpenApiExample,
+    OpenApiTypes,)
+
 from rest_framework import (
     viewsets,
     mixins,
@@ -20,6 +27,39 @@ from core.models import (
 from recipe import serializers
 
 
+@extend_schema_view(
+    list=extend_schema(
+        description='List all recipes for the authenticated user',
+        parameters=[
+            OpenApiParameter(
+                name='tags',
+                description='Filter recipes by tags',
+                required=False,
+                type=str,
+                location='query',
+                examples=[
+                    OpenApiExample(
+                        name='List recipes with tag 1 and 2',
+                        value='1,2'
+                    )
+                ]
+            ),
+            OpenApiParameter(
+                name='ingredients',
+                description='Filter recipes by ingredients',
+                required=False,
+                type=str,
+                location='query',
+                examples=[
+                    OpenApiExample(
+                        name='List recipes with ingredient 1 and 2',
+                        value='1,2'
+                    )
+                ]
+            )
+        ]
+    ),
+)
 class RecipeViewSet(viewsets.ModelViewSet):
     """Manage recipes in the database"""
     serializer_class = serializers.RecipeDetailSerializer
@@ -29,11 +69,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Recipe.objects.all()
 
+    def _params_to_ints(self, qs):
+        """Convert a list of string IDs to a list of integers"""
+        # The map function takes a function and an iterable.
+        # It applies the function to each element of the iterable.
+        # The map function returns a map object.
+        # We can convert the map object to a list.
+        return [int(str_id) for str_id in qs.split(',')]
+
     def get_queryset(self):
         """Return objects for the current authenticated user only"""
-        # The request object has a user object attached to it.
-        # We can use this to filter the queryset.
-        return self.queryset.filter(user=self.request.user).order_by('-id')
+        tags = self.request.query_params.get('tags')
+        ingredients = self.request.query_params.get('ingredients')
+        queryset = self.queryset
+        if tags:
+            tag_ids = self._params_to_ints(tags)
+            # The double underscores allow us to filter on a field
+            # of a related model.
+            # We can also filter on multiple fields of a related model.
+            queryset = queryset.filter(tags__id__in=tag_ids)
+        if ingredients:
+            ingredient_ids = self._params_to_ints(ingredients)
+            # The double underscores allow us to filter on a field
+            # of a related model.
+            # We can also filter on multiple fields of a related model.
+            queryset = queryset.filter(ingredients__id__in=ingredient_ids)
+        return queryset.filter(
+            user=self.request.user
+        ).order_by('-id').distinct()
 
     def get_serializer_class(self):
         """Return appropriate serializer class"""
@@ -76,6 +139,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
 
+@extend_schema_view(
+    list=extend_schema(
+        description='List all tags for the authenticated user',
+        parameters=[
+            OpenApiParameter(
+                'assigned_only',
+                OpenApiTypes.INT, enum=[0, 1],
+                description='Filter by items assigned to recipes',
+            )
+        ]
+    ),
+)
 class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
                             mixins.UpdateModelMixin,
                             mixins.ListModelMixin,
@@ -88,7 +163,18 @@ class BaseRecipeAttrViewSet(mixins.DestroyModelMixin,
         """Return objects for the current authenticated user only"""
         # The request object has a user object attached to it.
         # We can use this to filter the queryset.
-        return self.queryset.filter(user=self.request.user).order_by('-name')
+        assigned_only = bool(
+            int(self.request.query_params.get('assigned_only', 0))
+        )
+        queryset = self.queryset
+        if assigned_only:
+            # The double underscores allow us to filter on a field
+            # of a related model.
+            # We can also filter on multiple fields of a related model.
+            queryset = queryset.filter(recipe__isnull=False)
+        return queryset.filter(
+            user=self.request.user
+        ).order_by('-name').distinct()
 
 
 class TagViewSet(BaseRecipeAttrViewSet):
