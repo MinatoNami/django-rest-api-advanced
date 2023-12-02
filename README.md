@@ -45,3 +45,12 @@ Template project branch is the branch in which the following things are already 
 3. Token authentication is done.
 4. Docker is properly setup.
 5. Unit tests are written for most features.
+
+# Deployment
+
+Local deployment (Remember to change port to 8000)
+
+```bash
+docker-compose -f docker-compose-deploy.yml down
+docker-compose -f docker-compose-deploy.yml up
+```
